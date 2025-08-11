@@ -1,0 +1,72 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Supabase Auth Demo (Browser)</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h2>Supabase Auth-Demo</h2>
+
+    <div class="container">
+    <!-- ✅ Message area -->
+    <div id="message" class="message"></div>
+
+    <input id="email" placeholder="Email" type="email" />
+    <input id="password" placeholder="Password" type="password" />
+    <button id="signup">Sign Up</button>
+    <button id="signin">Sign In</button>
+    <button id="signout">Sign Out</button>
+    <pre id="out"></pre>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+    const out = document.getElementById('out')
+    const messageBox = document.getElementById('message')
+
+    const SUPABASE_URL = 'https://tvdtkjxymldpenmubujm.supabase.co'
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR2ZHRranh5bWxkcGVubXVidWptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ4ODM1MDksImV4cCI6MjA3MDQ1OTUwOX0.J6HYIRxNnLLFH7p5pP6XgiKDGaU2g0tdplCKV79cbR8'
+
+    const { createClient } = supabase
+    const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+
+    function showOutput(obj) {
+        out.textContent = JSON.stringify(obj, null, 2)
+    }
+
+    function showMessage(text, type = 'success') {
+        messageBox.textContent = text
+        messageBox.className = `message ${type} show`
+        setTimeout(() => {
+        messageBox.classList.remove('show')
+      }, 3000) // auto-hide after 3 seconds
+    }
+
+    document.getElementById('signup').onclick = async () => {
+        const email = document.getElementById('email').value
+        const password = document.getElementById('password').value
+        const { data, error } = await supabaseClient.auth.signUp({ email, password })
+        showOutput({ data, error })
+        if (error) showMessage(error.message, 'error')
+        else showMessage('Signed up successfully! Check your email if confirmation is required.', 'success')
+    }
+
+    document.getElementById('signin').onclick = async () => {
+        const email = document.getElementById('email').value
+        const password = document.getElementById('password').value
+        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password })
+        showOutput({ data, error })
+        if (error) showMessage(error.message, 'error')
+        else showMessage('Signed in successfully!', 'success')
+    }
+
+    document.getElementById('signout').onclick = async () => {
+        const { error } = await supabaseClient.auth.signOut()
+        showOutput({ error })
+        if (error) showMessage(error.message, 'error')
+        else showMessage('Signed out successfully!', 'success')
+    }
+    </script>
+</body>
+</html>
